@@ -1,3 +1,12 @@
+terraform {
+  backend "s3" {
+    bucket         = "disasterrecoverytfstates"  
+    key            = "terraform/state.tfstate"    
+    region         = "us-east-1"                  
+    encrypt        = true                         
+  }
+}
+
 provider "aws" {
   alias  = "primary"
   region = var.primary_region
@@ -10,8 +19,12 @@ provider "aws" {
 
 # Primary infrastructure
 resource "aws_vpc" "primary_vpc" {
+
   provider  = aws.primary
   cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "primary"
+  }
 }
 
 resource "aws_subnet" "primary_subnet_1" {
@@ -19,12 +32,18 @@ resource "aws_subnet" "primary_subnet_1" {
   vpc_id    = aws_vpc.primary_vpc.id
   cidr_block = "10.0.1.0/24"
   availability_zone = "us-east-1a"
+  tags = {
+    Name = "primary"
+  }
 }
 resource "aws_subnet" "primary_subnet_2" {
   provider  = aws.primary
   vpc_id    = aws_vpc.primary_vpc.id
   cidr_block = "10.0.2.0/24"
   availability_zone = "us-east-1b"
+  tags = {
+    Name = "primary"
+  }
 }
 
 resource "aws_instance" "primary_instance" {
@@ -32,6 +51,9 @@ resource "aws_instance" "primary_instance" {
   ami          = var.ami_id
   instance_type = var.instance_type
   subnet_id    = aws_subnet.primary_subnet_1.id
+  tags = {
+    Name = "primary"
+  }
 }
 
 
@@ -45,12 +67,18 @@ resource "aws_db_instance" "primary_db" {
   skip_final_snapshot  = true
   vpc_security_group_ids = [aws_security_group.primary_sg.id]
   db_subnet_group_name = aws_db_subnet_group.primary_subnet_group.name
+  tags = {
+    Name = "primary"
+  }
 }
 
 
 resource "aws_security_group" "primary_sg" {
   provider = aws.primary
   vpc_id   = aws_vpc.primary_vpc.id
+  tags = {
+    Name = "primary"
+  }
 
   ingress {
     from_port   = 3306
@@ -65,6 +93,7 @@ resource "aws_security_group" "primary_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  
 }
 
 
@@ -72,15 +101,18 @@ resource "aws_db_subnet_group" "primary_subnet_group" {
   provider  = aws.primary
   name      = "primary-db-subnet-group"
   subnet_ids = [aws_subnet.primary_subnet_1.id, aws_subnet.primary_subnet_2.id]
+  tags = {
+    Name = "primary"
+  }
 }
-
-
-
 
 
 resource "aws_vpc" "secondary_vpc" {
   provider = aws.secondary
   cidr_block = "10.1.0.0/16"
+  tags = {
+    Name = "secondary"
+  }
 }
 
 resource "aws_subnet" "secondary_subnet_1" {
@@ -88,6 +120,9 @@ resource "aws_subnet" "secondary_subnet_1" {
   vpc_id   = aws_vpc.secondary_vpc.id
   cidr_block = "10.1.1.0/24"
   availability_zone = "us-west-2a"
+   tags = {
+    Name = "secondary"
+  }
 }
 
 
@@ -96,6 +131,9 @@ resource "aws_subnet" "secondary_subnet_2" {
   vpc_id   = aws_vpc.secondary_vpc.id
   cidr_block = "10.1.2.0/24"
   availability_zone = "us-west-2c"
+   tags = {
+    Name = "secondary"
+  }
 }
 
 
@@ -103,10 +141,14 @@ resource "aws_db_subnet_group" "secondary_subnet_group" {
   provider  = aws.secondary
   name      = "secondary-db-subnet-group"
   subnet_ids = [aws_subnet.secondary_subnet_1.id, aws_subnet.secondary_subnet_2.id]
+   tags = {
+    Name = "secondary"
+  }
 }
 
 output "primary_instance_id" {
   value = aws_instance.primary_instance.id
+  
 }
 
 
