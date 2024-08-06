@@ -94,7 +94,7 @@ resource "aws_subnet" "secondary_subnet_2" {
 }
 
 
-resource "aws_db_subnet_group" "primary_subnet_group" {
+resource "aws_db_subnet_group" "secondary_subnet_group" {
   provider  = aws.secondary
   name      = "secondary-db-subnet-group"
   subnet_ids = [aws_subnet.secondary_subnet_1.id, aws_subnet.secondary_subnet_2.id]
