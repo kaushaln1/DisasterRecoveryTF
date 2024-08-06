@@ -14,17 +14,24 @@ resource "aws_vpc" "primary_vpc" {
   cidr_block = "10.0.0.0/16"
 }
 
-resource "aws_subnet" "primary_subnet" {
+resource "aws_subnet" "primary_subnet_1" {
   provider  = aws.primary
   vpc_id    = aws_vpc.primary_vpc.id
   cidr_block = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+}
+resource "aws_subnet" "primary_subnet_2" {
+  provider  = aws.primary
+  vpc_id    = aws_vpc.primary_vpc.id
+  cidr_block = "10.0.2.0/24"
+  availability_zone = "us-east-1b"
 }
 
 resource "aws_instance" "primary_instance" {
   provider     = aws.primary
   ami          = var.ami_id
   instance_type = var.instance_type
-  subnet_id    = aws_subnet.primary_subnet.id
+  subnet_id    = aws_subnet.primary_subnet_1.id
 }
 
 
@@ -64,7 +71,7 @@ resource "aws_security_group" "primary_sg" {
 resource "aws_db_subnet_group" "primary_subnet_group" {
   provider  = aws.primary
   name      = "primary-db-subnet-group"
-  subnet_ids = [aws_subnet.primary_subnet.id]
+  subnet_ids = [aws_subnet.primary_subnet_1.id, aws_subnet.primary_subnet_2.id]
 }
 
 
@@ -73,13 +80,25 @@ resource "aws_vpc" "secondary_vpc" {
   cidr_block = "10.1.0.0/16"
 }
 
-resource "aws_subnet" "secondary_subnet" {
+resource "aws_subnet" "secondary_subnet_1" {
   provider = aws.secondary
   vpc_id   = aws_vpc.secondary_vpc.id
   cidr_block = "10.1.1.0/24"
 }
 
 
+resource "aws_subnet" "secondary_subnet_2" {
+  provider = aws.secondary
+  vpc_id   = aws_vpc.secondary_vpc.id
+  cidr_block = "10.1.2.0/24"
+}
+
+
+resource "aws_db_subnet_group" "primary_subnet_group" {
+  provider  = aws.secondary
+  name      = "secondary-db-subnet-group"
+  subnet_ids = [aws_subnet.secondary_subnet_1.id, aws_subnet.secondary_subnet_2.id]
+}
 
 output "primary_instance_id" {
   value = aws_instance.primary_instance.id
