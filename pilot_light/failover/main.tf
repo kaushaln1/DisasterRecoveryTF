@@ -1,3 +1,11 @@
+terraform {
+  backend "s3" {
+    bucket = "disasterrecoverytfstates"
+    key    = "tfstates"
+    region = "us-east-1"
+  }
+}
+
 provider "aws" {
   region = var.secondary_region
 }
@@ -7,7 +15,7 @@ resource "aws_instance" "secondary_instance" {
   provider = aws.secondary
   ami      = var.ami_id
   instance_type = var.instance_type
-  subnet_id = aws_subnet.secondary_subnet.id
+  subnet_id = aws_subnet.secondary_subnet_1.id
 }
 # Create the DB instance in the secondary region
 resource "aws_db_instance" "failover_db" {
@@ -24,7 +32,7 @@ resource "aws_autoscaling_group" "secondary_asg" {
   desired_capacity = var.desired_capacity
   max_size         = var.max_size
   min_size         = var.min_size
-  vpc_zone_identifier = [aws_subnet.secondary_subnet.id]
+  vpc_zone_identifier = [aws_subnet.secondary_subnet_1.id , aws_subnet.secondary_subnet_2.id]
 
   # Other required parameters here...
 }
