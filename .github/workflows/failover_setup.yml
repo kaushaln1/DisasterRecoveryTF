@@ -1,4 +1,4 @@
-name: Deploy Initial Setup
+name: Failover Setup
 
 on:
   workflow_dispatch: # Allows manual triggering
@@ -19,6 +19,8 @@ jobs:
       - name: Terraform Init
         run: terraform init
         working-directory: pilot_light/failover
+
+        
       - name: Check Environment Variables
         run: |
               echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
