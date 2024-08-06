@@ -79,20 +79,12 @@ resource "aws_subnet" "secondary_subnet" {
   cidr_block = "10.1.1.0/24"
 }
 
-resource "aws_instance" "secondary_instance" {
-  provider = aws.secondary
-  ami      = var.ami_id
-  instance_type = var.instance_type
-  subnet_id = aws_subnet.secondary_subnet.id
-}
+
 
 output "primary_instance_id" {
   value = aws_instance.primary_instance.id
 }
 
-output "secondary_instance_id" {
-  value = aws_instance.secondary_instance.id
-}
 
 output "primary_db_endpoint" {
   value = aws_db_instance.primary_db.endpoint

@@ -2,10 +2,17 @@ provider "aws" {
   region = var.secondary_region
 }
 
+#instance ec2 secondary
+resource "aws_instance" "secondary_instance" {
+  provider = aws.secondary
+  ami      = var.ami_id
+  instance_type = var.instance_type
+  subnet_id = aws_subnet.secondary_subnet.id
+}
 # Create the DB instance in the secondary region
 resource "aws_db_instance" "failover_db" {
   allocated_storage       = 20
- instance_class       = "db.t3.micro"
+  instance_class       = "db.t3.micro"
   engine                  = "mysql"
   username         = "foo"
   password         = "bar"
@@ -24,4 +31,8 @@ resource "aws_autoscaling_group" "secondary_asg" {
 
 output "failover_db_endpoint" {
   value = aws_db_instance.failover_db.endpoint
+}
+
+output "secondary_instance_id" {
+  value = aws_instance.secondary_instance.id
 }
