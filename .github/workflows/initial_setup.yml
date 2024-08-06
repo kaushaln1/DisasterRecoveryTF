@@ -18,10 +18,10 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./initial_setup
+        working-directory: initial_setup
 
       - name: Terraform Plan
-        run: terraform plan -var-file="./iniital_setup/tf.tfvars"
+        run: terraform plan -var-file="tf.tfvars"
 
       - name: Terraform Apply
         run: terraform apply
