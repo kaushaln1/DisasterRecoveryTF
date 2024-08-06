@@ -16,29 +16,26 @@ jobs:
         with:
           terraform_version: 1.3.7
 
+      - name: Terraform Init
+        run: terraform init
+        working-directory: pilot_light/failover
       - name: Check Environment Variables
         run: |
               echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
               echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
               export AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
               export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-
-              
-      - name: Terraform Init
-        run: terraform init
-        working-directory: pilot_light/initial_setup
-      
               
       - name: Terraform Plan
         run: terraform plan -var-file="tf.tfvars"
-        working-directory: pilot_light/initial_setup
+        working-directory: pilot_light/failover
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Terraform Apply (auto approve)
         run: terraform apply -var-file="tf.tfvars" -auto-approve
-        working-directory: pilot_light/initial_setup
+        working-directory: pilot_light/failover
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
